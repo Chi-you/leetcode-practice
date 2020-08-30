@@ -8,11 +8,12 @@ private:
     struct Node {
         int val;
         Node *next, *prev;
-        Node(int val): val(val), next(NULL){}
-        Node(int val, Node *ptr): val(val), next(ptr){}
+        Node(int val): val(val), next(NULL), prev(NULL){}
+        Node(int val, Node *ptr): val(val), next(ptr), prev(NULL){}
+        Node(int val, Node *ptrp, Node *ptrn): val(val), next(ptrn), prev(ptrp){}
     };
     int size;
-    Node *head;
+    Node *head = new Node(0, NULL, NULL);
     //Node *tail;
 public:
     /** Initialize your data structure here. */
@@ -40,6 +41,8 @@ public:
         }
         else{
             newhead->next = head;
+            head->prev = newhead;
+            //newhead->prev = NULL;
             head = newhead;
         }
         size++;
@@ -49,13 +52,12 @@ public:
     void addAtTail(int val) {
         Node *current = head;
         Node *newtail = new Node(val);
-        //newtail->val = val;
         while(current -> next != NULL){
             current = current -> next;
         }
         current->next = newtail;
+        newtail->prev = current;
         size++;
-        //tail = newtail;
     }
     
     /** Add a node of value val before the index-th node in the linked list. If index equals to the length of linked list, the node will be appended to the end of linked list. If index is greater than the length, the node will not be inserted. */
@@ -68,8 +70,12 @@ public:
             for(int i = 0; i < index-1; i++){
                 current = current->next;
             }
+            // we must link four pointer 
             newnode -> next = current -> next;
             current -> next = newnode;
+            newnode -> prev = current;
+            if(newnode->next) //newnode->next != NULL
+                newnode -> next ->prev = newnode;
         }
         size++;
         
@@ -78,7 +84,7 @@ public:
     /** Delete the index-th node in the linked list, if the index is valid. */
     void deleteAtIndex(int index) {
         Node *current = head;
-        Node *prev = current;
+        //Node *pre = current;
         if(index >= size) return;
         else if(index == 0){
             head = current -> next;
@@ -86,12 +92,16 @@ public:
         }
         else {
             for(int i = 0; i < index; i++){
-                prev = current;
+                //pre = current;
                 current = current->next;
             }
-            Node *temp = current;
-            prev-> next = current -> next;
-            delete temp;
+            Node *del = current;
+            //pre-> next = current -> next;
+            if(del->prev)
+                del->prev->next = current->next;
+            if(del->next)
+                del->next->prev = current->prev;
+            delete del;
         }
         size--;
     }
